@@ -1359,6 +1359,436 @@
                     }
                 }
             ]
+        },
+        {
+            "name": "11. Reviews (US2-1 to US2-4)",
+            "item": [
+                {
+                    "name": "Get Reviews for Hotel (Public - Empty)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Returns array of reviews\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.eql(true);",
+                                    "    pm.expect(jsonData.data).to.be.an('array');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/hotels/{{hotelId}}/reviews",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "v1", "hotels", "{{hotelId}}", "reviews"]
+                        }
+                    }
+                },
+                {
+                    "name": "Add Review Without Booking (Should Fail 403)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 403\", function () {",
+                                    "    pm.response.to.have.status(403);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Error: booking required\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.eql(false);",
+                                    "    pm.expect(jsonData.message).to.include('booking');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {"key": "Content-Type", "value": "application/json"},
+                            {"key": "Authorization", "value": "Bearer {{adminToken}}"}
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"score\": 3,\n    \"comment\": \"ทดสอบการรีวิวโดยไม่มีการจอง\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/hotels/{{hotelId}}/reviews",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "v1", "hotels", "{{hotelId}}", "reviews"]
+                        }
+                    }
+                },
+                {
+                    "name": "Add Review (With Booking)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 201\", function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Review created with score and comment\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.eql(true);",
+                                    "    pm.expect(jsonData.data.score).to.eql(5);",
+                                    "    pm.expect(jsonData.data.comment).to.exist;",
+                                    "    pm.environment.set('reviewId', jsonData.data._id);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {"key": "Content-Type", "value": "application/json"},
+                            {"key": "Authorization", "value": "Bearer {{userToken}}"}
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"score\": 5,\n    \"comment\": \"โรงแรมดีมากครับ บริการยอดเยี่ยม ห้องสะอาด\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/hotels/{{hotelId}}/reviews",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "v1", "hotels", "{{hotelId}}", "reviews"]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Reviews for Hotel (Verify Review Appears)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Review appears in list with user info\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.count).to.be.above(0);",
+                                    "    var review = jsonData.data[0];",
+                                    "    pm.expect(review.score).to.exist;",
+                                    "    pm.expect(review.comment).to.exist;",
+                                    "    pm.expect(review.user).to.exist;",
+                                    "    pm.expect(review.user.name).to.exist;",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/hotels/{{hotelId}}/reviews",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "v1", "hotels", "{{hotelId}}", "reviews"]
+                        }
+                    }
+                },
+                {
+                    "name": "Add Duplicate Review (Should Fail 400)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 400\", function () {",
+                                    "    pm.response.to.have.status(400);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Error: already reviewed\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.eql(false);",
+                                    "    pm.expect(jsonData.message).to.include('already reviewed');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {"key": "Content-Type", "value": "application/json"},
+                            {"key": "Authorization", "value": "Bearer {{userToken}}"}
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"score\": 4,\n    \"comment\": \"รีวิวซ้ำไม่ควรผ่าน\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/hotels/{{hotelId}}/reviews",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "v1", "hotels", "{{hotelId}}", "reviews"]
+                        }
+                    }
+                },
+                {
+                    "name": "Owner Updates Own Review (US2-3)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Review updated with new score and comment\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.eql(true);",
+                                    "    pm.expect(jsonData.data.score).to.eql(5);",
+                                    "    pm.expect(jsonData.data.comment).to.include('แก้ไขรีวิว');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {"key": "Content-Type", "value": "application/json"},
+                            {"key": "Authorization", "value": "Bearer {{userToken}}"}
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"score\": 5,\n    \"comment\": \"แก้ไขรีวิวแล้ว ห้องดีมาก\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/reviews/{{reviewId}}",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "v1", "reviews", "{{reviewId}}"]
+                        }
+                    }
+                },
+                {
+                    "name": "Non-owner Cannot Update Review (Should Fail 401)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 401\", function () {",
+                                    "    pm.response.to.have.status(401);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Error: not authorized\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.eql(false);",
+                                    "    pm.expect(jsonData.message).to.include('not authorized');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {"key": "Content-Type", "value": "application/json"},
+                            {"key": "Authorization", "value": "Bearer {{adminToken}}"}
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"score\": 1,\n    \"comment\": \"admin พยายามแก้ไขรีวิวของคนอื่น\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/reviews/{{reviewId}}",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "v1", "reviews", "{{reviewId}}"]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Reviews (Verify Updated Content)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Review shows updated score and comment\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.count).to.be.above(0);",
+                                    "    var review = jsonData.data[0];",
+                                    "    pm.expect(review.score).to.eql(5);",
+                                    "    pm.expect(review.comment).to.include('แก้ไขรีวิว');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/hotels/{{hotelId}}/reviews",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "v1", "hotels", "{{hotelId}}", "reviews"]
+                        }
+                    }
+                },
+                {
+                    "name": "User Deletes Own Review",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Review deleted successfully\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.eql(true);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {"key": "Authorization", "value": "Bearer {{userToken}}"}
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/reviews/{{reviewId}}",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "v1", "reviews", "{{reviewId}}"]
+                        }
+                    }
+                },
+                {
+                    "name": "Add Review Again (For Admin Delete Test)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 201\", function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Review re-created\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.eql(true);",
+                                    "    pm.environment.set('reviewId2', jsonData.data._id);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {"key": "Content-Type", "value": "application/json"},
+                            {"key": "Authorization", "value": "Bearer {{userToken}}"}
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"score\": 3,\n    \"comment\": \"รีวิวสำหรับทดสอบการลบโดย admin\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/hotels/{{hotelId}}/reviews",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "v1", "hotels", "{{hotelId}}", "reviews"]
+                        }
+                    }
+                },
+                {
+                    "name": "Admin Deletes Any Review",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Admin can delete any review\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.eql(true);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {"key": "Authorization", "value": "Bearer {{adminToken}}"}
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/reviews/{{reviewId2}}",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "v1", "reviews", "{{reviewId2}}"]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Reviews (Verify Cleaned Up)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"No reviews remaining\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.success).to.eql(true);",
+                                    "    pm.expect(jsonData.count).to.eql(0);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/hotels/{{hotelId}}/reviews",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "v1", "hotels", "{{hotelId}}", "reviews"]
+                        }
+                    }
+                }
+            ]
         }
     ],
     "variable": [

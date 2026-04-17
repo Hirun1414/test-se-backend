@@ -22,7 +22,7 @@ exports.getHotels = async(req, res, next) => {
     queryStr = queryStr.replace(/\b(gt|gte|lt|lte|in\b)/g, match => `${match}`);
 
     //finding resource
-    query = Hotel.find(JSON.parse(queryStr)).populate('bookings').populate('ratings');
+    query = Hotel.find(JSON.parse(queryStr)).populate('bookings').populate('ratings').populate('reviews');
 
     //Select Feilds
     if(req.query.select){
@@ -79,7 +79,7 @@ exports.getHotels = async(req, res, next) => {
 //@acess Public
 exports.getHotel = async(req, res, next) => {
    try{
-    const hotel = await Hotel.findById(req.params.id).populate('ratings');
+    const hotel = await Hotel.findById(req.params.id).populate('ratings').populate('reviews');
 
     if(!hotel){
         return  res.status(400).json({success: false});
