@@ -62,4 +62,11 @@ HotelSchema.virtual('ratings', {
     justOne: false
 });
 
+HotelSchema.virtual('reviews', {
+    ref: 'Review',
+    localField: '_id',
+    foreignField: 'hotel',
+    justOne: false
+});
+
 module.exports = mongoose.model('Hotel', HotelSchema);
