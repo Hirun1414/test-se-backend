@@ -73,6 +73,12 @@ exports.addReview = async (req, res, next) => {
         res.status(201).json({ success: true, data: review });
     } catch (err) {
         console.log(err.stack);
+        if (err.name === 'ValidationError') {
+            return res.status(400).json({ success: false, message: err.message });
+        }
+        if (err.code === 11000) {
+            return res.status(400).json({ success: false, message: 'You have already reviewed this hotel' });
+        }
         return res.status(500).json({ success: false, message: 'Cannot create Review' });
     }
 };
@@ -110,6 +116,9 @@ exports.updateReview = async (req, res, next) => {
         res.status(200).json({ success: true, data: review });
     } catch (err) {
         console.log(err.stack);
+        if (err.name === 'ValidationError') {
+            return res.status(400).json({ success: false, message: err.message });
+        }
         return res.status(500).json({ success: false, message: 'Cannot update Review' });
     }
 };
@@ -128,7 +137,9 @@ exports.deleteReview = async (req, res, next) => {
             });
         }
 
-        if (review.user.toString() !== req.user.id && req.user.role !== 'admin') {
+        const isOwner = review.user.toString() === req.user.id;
+        const isPrivileged = req.user.role === 'admin' || req.user.role === 'PomPhet';
+        if (!isOwner && !isPrivileged) {
             return res.status(401).json({
                 success: false,
                 message: `User ${req.user.id} is not authorized to delete this review`

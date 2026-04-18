@@ -16,7 +16,6 @@ const hotels = require ('./routes/hotels');
 const auth = require('./routes/auth');
 const bookings = require('./routes/bookings');
 const users = require('./routes/users');
-const ratings = require('./routes/ratings');
 const reviews = require('./routes/reviews');
 const roomservices = require('./routes/roomservices');
 
@@ -33,7 +32,6 @@ app.use('/api/v1/hotels', hotels);
 app.use('/api/v1/auth',auth);
 app.use('/api/v1/bookings', bookings);
 app.use('/api/v1/users',users);
-app.use('/api/v1/ratings', ratings);
 app.use('/api/v1/reviews', reviews);
 app.use('/api/v1/roomservices', roomservices);
 

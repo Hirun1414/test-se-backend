@@ -3,14 +3,14 @@ const { getReviews, addReview, updateReview, deleteReview } = require('../contro
 
 const router = express.Router({ mergeParams: true });
 
-const { protect } = require('../middleware/auth');
+const { protect, checkBanned } = require('../middleware/auth');
 
 router.route('/')
     .get(getReviews)
-    .post(protect, addReview);
+    .post(protect, checkBanned, addReview);
 
 router.route('/:id')
-    .put(protect, updateReview)
-    .delete(protect, deleteReview);
+    .put(protect, checkBanned, updateReview)
+    .delete(protect, checkBanned, deleteReview);
 
 module.exports = router;
