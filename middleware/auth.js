@@ -41,7 +41,7 @@ exports.authorize=(...roles)=>{
 }
 
 exports.checkBanned = (req, res, next) => {
-    if (req.user.isBan) {
+    if (req.user.isban) {
         return res.status(403).json({
             success: false,
             message: 'Action denied. Your account has been banned.'

@@ -55,13 +55,6 @@ HotelSchema.virtual('bookings', {
     justOne: false
 });
 
-HotelSchema.virtual('ratings', {
-    ref: 'Rating',
-    localField: '_id',
-    foreignField: 'hotel',
-    justOne: false
-});
-
 HotelSchema.virtual('reviews', {
     ref: 'Review',
     localField: '_id',

@@ -1,5 +1,6 @@
 const Hotel = require('../models/Hotel');
 const Booking = require('../models/Booking');
+const Review = require('../models/Review');
 
 //@desc Get all hotels
 //@route GET /api/v1/hotels
@@ -22,7 +23,9 @@ exports.getHotels = async(req, res, next) => {
     queryStr = queryStr.replace(/\b(gt|gte|lt|lte|in\b)/g, match => `${match}`);
 
     //finding resource
-    query = Hotel.find(JSON.parse(queryStr)).populate('bookings').populate('ratings').populate('reviews');
+    query = Hotel.find(JSON.parse(queryStr))
+        .populate('bookings')
+        .populate({ path: 'reviews', populate: { path: 'user', select: 'name email' } });
 
     //Select Feilds
     if(req.query.select){
@@ -79,7 +82,8 @@ exports.getHotels = async(req, res, next) => {
 //@acess Public
 exports.getHotel = async(req, res, next) => {
    try{
-    const hotel = await Hotel.findById(req.params.id).populate('ratings').populate('reviews');
+    const hotel = await Hotel.findById(req.params.id)
+        .populate({ path: 'reviews', populate: { path: 'user', select: 'name email' } });
 
     if(!hotel){
         return  res.status(400).json({success: false});
@@ -135,8 +139,9 @@ exports.deleteHotel = async(req, res, next) => {
                 message: `Hotel not found with id of ${req.params.id}`
                 });
         }
-        await Booking.deleteMany({hotel: req.params.id});
-        await Hotel.deleteOne({_id: req.params.id});
+        await Booking.deleteMany({ hotel: req.params.id });
+        await Review.deleteMany({ hotel: req.params.id });
+        await Hotel.deleteOne({ _id: req.params.id });
 
         res.status(200).json({success: true, data: {}});
         
