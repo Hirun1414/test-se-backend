@@ -33,7 +33,12 @@ const BookingSchema = new mongoose.Schema({
         default: 'pending',
         required: true,
         index: true
-      }
+      },
+      quantity: {                 
+        type: Number,
+        required: true,
+        min: 1
+      },
     }
   ],
 

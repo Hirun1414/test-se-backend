@@ -19,6 +19,8 @@ exports.createRoomService = async (req, res) => {
       hotel: hotelId,
       name,
       description,
+      minQuantity,
+      maxQuantity,
       status: status || 'available'
     });
 
