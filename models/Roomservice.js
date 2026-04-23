@@ -21,12 +21,24 @@ const RoomServiceSchema = new mongoose.Schema({
     trim: true
   },
 
-  status: {
-    type: String,
-    enum: ['available', 'unavailable'],
-    default: 'available',
-    index: true
-  }
+  // models/RoomService.js
+status: {
+  type: String,
+  enum: ['available', 'unavailable', 'pending'],  // add pending
+  default: 'available',
+  index: true
+},
+
+minAmount: {
+  type: Number,
+  default: 1,
+  min: [1, 'Minimum amount must be greater than zero']
+},
+
+maxAmount: {
+  type: Number,
+  default: 10
+}
 
 }, {
   timestamps: true,

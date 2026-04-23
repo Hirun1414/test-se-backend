@@ -78,3 +78,41 @@ exports.getRoomServicesByBooking = async (req, res) => {
     res.status(400).json({ success: false, error: err.message });
   }
 };
+// controllers/roomservices.js
+exports.updateRoomService = async (req, res) => {
+  try {
+    const { name, description, status, minAmount, maxAmount } = req.body;
+
+    if (minAmount !== undefined && minAmount <= 0) {
+      return res.status(400).json({ success: false, message: 'Minimum amount must be greater than zero' });
+    }
+    if (minAmount !== undefined && maxAmount !== undefined && maxAmount < minAmount) {
+      return res.status(400).json({ success: false, message: 'Maximum amount must not be less than minimum amount' });
+    }
+
+    const service = await RoomService.findByIdAndUpdate(
+      req.params.id,
+      { name, description, status, minAmount, maxAmount },
+      { new: true, runValidators: true }
+    );
+
+    if (!service) {
+      return res.status(404).json({ success: false, message: 'Room service not found' });
+    }
+
+    res.status(200).json({ success: true, data: service });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+exports.getRoomServiceById = async (req, res) => {
+  try {
+    const service = await RoomService.findById(req.params.id);
+    if (!service) {
+      return res.status(404).json({ success: false, message: 'Room service not found' });
+    }
+    res.status(200).json({ success: true, data: service });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};

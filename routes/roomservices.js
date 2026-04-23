@@ -1,10 +1,13 @@
 const express = require("express");
+// routes/roomservices.js
+// routes/roomservices.js
 const {
   createRoomService,
   getRoomServicesByHotel,
-  getRoomServicesByBooking
+  getRoomServicesByBooking,
+  updateRoomService ,         // add this
+  getRoomServiceById  
 } = require("../controllers/roomservices");
-
 const router = express.Router();
 
 // POST /api/v1/roomservices - Create a new room service
@@ -15,5 +18,9 @@ router.get("/hotel/:hotelId", getRoomServicesByHotel);
 
 // GET /api/v1/roomservices/booking/:bookingId - Get all services for a booking
 router.get("/booking/:bookingId", getRoomServicesByBooking);
+
+router.get("/:id", getRoomServiceById);
+
+router.put("/:id", updateRoomService);
 
 module.exports = router;
