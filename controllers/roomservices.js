@@ -116,3 +116,22 @@ exports.getRoomServiceById = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
+exports.deleteRoomService = async (req, res) => {
+  try {
+    const service = await RoomService.findByIdAndDelete(req.params.id);
+
+    if (!service) {
+      return res.status(404).json({ success: false, message: 'Room service not found' });
+    }
+
+    await Booking.updateMany(
+      { 'services.service': req.params.id },
+      { $pull: { services: { service: req.params.id } } }
+    );
+
+    res.status(200).json({ success: true, data: {} });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};

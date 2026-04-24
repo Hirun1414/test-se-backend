@@ -6,7 +6,8 @@ const {
   getRoomServicesByHotel,
   getRoomServicesByBooking,
   updateRoomService ,         // add this
-  getRoomServiceById  
+  getRoomServiceById,
+  deleteRoomService
 } = require("../controllers/roomservices");
 const router = express.Router();
 
@@ -22,5 +23,6 @@ router.get("/booking/:bookingId", getRoomServicesByBooking);
 router.get("/:id", getRoomServiceById);
 
 router.put("/:id", updateRoomService);
+router.delete("/:id", deleteRoomService);
 
 module.exports = router;
